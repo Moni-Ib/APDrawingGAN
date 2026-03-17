@@ -42,8 +42,8 @@ class BaseModel():
 
         if not self.isTrain or opt.continue_train:
             self.load_networks(opt.which_epoch)
-        if self.isTrain:
-            self.load_auxiliary_networks()
+        #if self.isTrain:
+            #self.load_auxiliary_networks()
         self.print_networks(opt.verbose)
 
     # make models eval mode during test time
@@ -192,24 +192,8 @@ class BaseModel():
     
     # load auxiliary net models from the disk
     def load_auxiliary_networks(self):
-        for name in self.auxiliary_model_names:
-            if isinstance(name, str):
-                load_filename = '%s_net_%s.pth' % ('latest', name)
-                load_path = os.path.join(self.auxiliary_dir, load_filename)
-                net = getattr(self, 'net' + name)
-                if isinstance(net, torch.nn.DataParallel):
-                    net = net.module
-                print('loading the model from %s' % load_path)
-                # if you are using PyTorch newer than 0.4 (e.g., built from
-                # GitHub source), you can remove str() on self.device
-                state_dict = torch.load(load_path, map_location=str(self.device))
-                if hasattr(state_dict, '_metadata'):
-                    del state_dict._metadata
-
-                # patch InstanceNorm checkpoints prior to 0.4
-                for key in list(state_dict.keys()):  # need to copy keys here because we mutate in loop
-                    self.__patch_instance_norm_state_dict(state_dict, net, key.split('.'))
-                net.load_state_dict(state_dict)
+        print("Skipping auxiliary networks...")
+        return
 
     # print network information
     def print_networks(self, verbose):

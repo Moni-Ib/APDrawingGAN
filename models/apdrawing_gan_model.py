@@ -30,9 +30,9 @@ class APDrawingGANModel(BaseModel):
             self.loss_names.append('D_real_local')
             self.loss_names.append('D_fake_local')
             self.loss_names.append('G_GAN_local')
-        if self.isTrain:
-            self.loss_names.append('G_chamfer')
-            self.loss_names.append('G_chamfer2')
+        # if self.isTrain:
+        #     self.loss_names.append('G_chamfer')
+        #     self.loss_names.append('G_chamfer2')
         self.loss_names.append('G')
         print('loss_names', self.loss_names)
         # specify the images you want to save/display. The program will call base_model.get_current_visuals
@@ -41,8 +41,8 @@ class APDrawingGANModel(BaseModel):
             self.visual_names += ['fake_B0', 'fake_B1']
             self.visual_names += ['fake_B_hair', 'real_B_hair', 'real_A_hair']
             self.visual_names += ['fake_B_bg', 'real_B_bg', 'real_A_bg']
-        if self.isTrain:
-            self.visual_names += ['dt1', 'dt2', 'dt1gt', 'dt2gt']
+        # if self.isTrain:
+        #     self.visual_names += ['dt1', 'dt2', 'dt1gt', 'dt2gt']
         if not self.isTrain and self.opt.save2:
             self.visual_names = ['real_A', 'fake_B']
         print('visuals', self.visual_names)
@@ -52,7 +52,8 @@ class APDrawingGANModel(BaseModel):
             if self.opt.discriminator_local:
                 self.model_names += ['DLEyel','DLEyer','DLNose','DLMouth','DLHair','DLBG']
             # auxiliary nets for loss calculation
-            self.auxiliary_model_names = ['DT1', 'DT2', 'Line1', 'Line2']
+            #self.auxiliary_model_names = ['DT1', 'DT2', 'Line1', 'Line2']
+            self.auxiliary_model_names = []
         else:  # during test time, only load Gs
             self.model_names = ['G']
             self.auxiliary_model_names = []
@@ -72,36 +73,36 @@ class APDrawingGANModel(BaseModel):
             self.netD = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
                                           opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
             print('netD', opt.netD, opt.n_layers_D)
-            if self.opt.discriminator_local:
-                self.netDLEyel = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
-                                          opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
-                self.netDLEyer = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
-                                          opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
-                self.netDLNose = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
-                                          opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
-                self.netDLMouth = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
-                                          opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
-                self.netDLHair = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
-                                          opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
-                self.netDLBG = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
-                                          opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
+            #if self.opt.discriminator_local:
+                #self.netDLEyel = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
+                #                           opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
+                # self.netDLEyer = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
+                #                           opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
+                # self.netDLNose = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
+                #                           opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
+                # self.netDLMouth = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
+                #                           opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
+                # self.netDLHair = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
+                #                           opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
+                # self.netDLBG = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD,
+                #                           opt.n_layers_D, opt.norm, use_sigmoid, opt.init_type, opt.init_gain, self.gpu_ids)
                 
         
-        if self.opt.use_local:
-            self.netGLEyel = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet', opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 3)
-            self.netGLEyer = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet', opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 3)
-            self.netGLNose = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet', opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 3)
-            self.netGLMouth = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet', opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 3)
-            self.netGLHair = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet2', opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 4)
-            self.netGLBG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet2', opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 4)
-            self.netGCombine = networks.define_G(2*opt.output_nc, opt.output_nc, opt.ngf, 'combiner', opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 2)
+        # if self.opt.use_local:
+        #     self.netGLEyel = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet', opt.norm,
+        #                               not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 3)
+        #     self.netGLEyer = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet', opt.norm,
+        #                               not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 3)
+        #     self.netGLNose = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet', opt.norm,
+        #                               not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 3)
+        #     self.netGLMouth = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet', opt.norm,
+        #                               not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 3)
+        #     self.netGLHair = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet2', opt.norm,
+        #                               not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 4)
+        #     self.netGLBG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, 'partunet2', opt.norm,
+        #                               not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 4)
+        #     self.netGCombine = networks.define_G(2*opt.output_nc, opt.output_nc, opt.ngf, 'combiner', opt.norm,
+        #                               not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids, 2)
         
 
         if self.isTrain:
@@ -134,21 +135,21 @@ class APDrawingGANModel(BaseModel):
             self.optimizers.append(self.optimizer_D)
         
         # ==================================auxiliary nets (loaded, parameters fixed)=============================
-        if self.isTrain:
-            self.nc = 1
-            self.netDT1 = networks.define_G(self.nc, self.nc, opt.ngf, opt.netG_dt, opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
-            self.netDT2 = networks.define_G(self.nc, self.nc, opt.ngf, opt.netG_dt, opt.norm,
-                                      not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
-            self.set_requires_grad(self.netDT1, False)
-            self.set_requires_grad(self.netDT2, False)
+        # if self.isTrain:
+        #     self.nc = 1
+        #     self.netDT1 = networks.define_G(self.nc, self.nc, opt.ngf, opt.netG_dt, opt.norm,
+        #                               not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
+        #     self.netDT2 = networks.define_G(self.nc, self.nc, opt.ngf, opt.netG_dt, opt.norm,
+        #                               not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
+        #     self.set_requires_grad(self.netDT1, False)
+        #     self.set_requires_grad(self.netDT2, False)
             
-            self.netLine1 = networks.define_G(self.nc, self.nc, opt.ngf, opt.netG_line, opt.norm,
-                                    not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
-            self.netLine2 = networks.define_G(self.nc, self.nc, opt.ngf, opt.netG_line, opt.norm,
-                                    not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
-            self.set_requires_grad(self.netLine1, False)
-            self.set_requires_grad(self.netLine2, False)
+        #     self.netLine1 = networks.define_G(self.nc, self.nc, opt.ngf, opt.netG_line, opt.norm,
+        #                             not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
+        #     self.netLine2 = networks.define_G(self.nc, self.nc, opt.ngf, opt.netG_line, opt.norm,
+        #                             not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
+        #     self.set_requires_grad(self.netLine1, False)
+        #     self.set_requires_grad(self.netLine2, False)
         
 
     def set_input(self, input):
@@ -172,9 +173,9 @@ class APDrawingGANModel(BaseModel):
             self.real_B_bg = input['bg_B'].to(self.device)
             self.mask = input['mask'].to(self.device) # mask for non-eyes,nose,mouth
             self.mask2 = input['mask2'].to(self.device) # mask for non-bg
-        if self.isTrain:
-            self.dt1gt = input['dt1gt'].to(self.device)
-            self.dt2gt = input['dt2gt'].to(self.device)
+        # if self.isTrain:
+        #     self.dt1gt = input['dt1gt'].to(self.device)
+        #     self.dt2gt = input['dt2gt'].to(self.device)
         
 
     def forward(self):
@@ -287,36 +288,36 @@ class APDrawingGANModel(BaseModel):
             real_B_gray = self.real_B
         
         # d_CM(a_i,G(p_i))
-        self.dt1 = self.netDT1(fake_B_gray)
-        self.dt2 = self.netDT2(fake_B_gray)
-        dt1 = self.dt1/2.0+0.5#[-1,1]->[0,1]
-        dt2 = self.dt2/2.0+0.5
+        #self.dt1 = self.netDT1(fake_B_gray)
+        # self.dt2 = self.netDT2(fake_B_gray)
+        # dt1 = self.dt1/2.0+0.5#[-1,1]->[0,1]
+        # dt2 = self.dt2/2.0+0.5
         
-        bs = real_B_gray.shape[0]
-        real_B_gray_line1 = self.netLine1(real_B_gray)
-        real_B_gray_line2 = self.netLine2(real_B_gray)
-        self.loss_G_chamfer = (dt1[(real_B_gray<0)&(real_B_gray_line1<0)].sum() + dt2[(real_B_gray>=0)&(real_B_gray_line2>=0)].sum()) / bs * self.opt.lambda_chamfer
+        # bs = real_B_gray.shape[0]
+        # real_B_gray_line1 = self.netLine1(real_B_gray)
+        # real_B_gray_line2 = self.netLine2(real_B_gray)
+        # self.loss_G_chamfer = (dt1[(real_B_gray<0)&(real_B_gray_line1<0)].sum() + dt2[(real_B_gray>=0)&(real_B_gray_line2>=0)].sum()) / bs * self.opt.lambda_chamfer
 
         # d_CM(G(p_i),a_i)
-        dt1gt = self.dt1gt
-        dt2gt = self.dt2gt
-        self.dt1gt = (self.dt1gt-0.5)*2
-        self.dt2gt = (self.dt2gt-0.5)*2
+        # dt1gt = self.dt1gt
+        # dt2gt = self.dt2gt
+        # self.dt1gt = (self.dt1gt-0.5)*2
+        # self.dt2gt = (self.dt2gt-0.5)*2
 
-        fake_B_gray_line1 = self.netLine1(fake_B_gray)
-        fake_B_gray_line2 = self.netLine2(fake_B_gray)
-        self.loss_G_chamfer2 = (dt1gt[(fake_B_gray<0)&(fake_B_gray_line1<0)].sum() + dt2gt[(fake_B_gray>=0)&(fake_B_gray_line2>=0)].sum()) / bs * self.opt.lambda_chamfer2
+        # fake_B_gray_line1 = self.netLine1(fake_B_gray)
+        # fake_B_gray_line2 = self.netLine2(fake_B_gray)
+        # self.loss_G_chamfer2 = (dt1gt[(fake_B_gray<0)&(fake_B_gray_line1<0)].sum() + dt2gt[(fake_B_gray>=0)&(fake_B_gray_line2>=0)].sum()) / bs * self.opt.lambda_chamfer2
                 
 
         self.loss_G = self.loss_G_GAN
         if 'G_L1' in self.loss_names:
             self.loss_G = self.loss_G + self.loss_G_L1
-        if 'G_local' in self.loss_names:
-            self.loss_G = self.loss_G + self.loss_G_local
-        if 'G_chamfer' in self.loss_names:
-            self.loss_G = self.loss_G + self.loss_G_chamfer
-        if 'G_chamfer2' in self.loss_names:
-            self.loss_G = self.loss_G + self.loss_G_chamfer2
+        # if 'G_local' in self.loss_names:
+        #     self.loss_G = self.loss_G + self.loss_G_local
+        # if 'G_chamfer' in self.loss_names:
+        #     self.loss_G = self.loss_G + self.loss_G_chamfer
+        # if 'G_chamfer2' in self.loss_names:
+        #     self.loss_G = self.loss_G + self.loss_G_chamfer2
 
         self.loss_G.backward()
 
