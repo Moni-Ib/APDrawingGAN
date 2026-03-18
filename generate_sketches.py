@@ -11,23 +11,19 @@ for filename in os.listdir(input_folder):
         
         img_path = os.path.join(input_folder, filename)
         img = cv2.imread(img_path)
-
-        # Hacemos resize 
         img = cv2.resize(img, (256, 256))
 
-        # Convertir a gris
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # Suavizar
-        blur = cv2.GaussianBlur(gray, (5, 5), 0)
+        # Invertir
+        inv = 255 - gray
 
-        # Bordes (sketch)
-        edges = cv2.Canny(blur, 50, 150)
+        # Blur fuerte
+        blur = cv2.GaussianBlur(inv, (21, 21), 0)
 
-        # Invertir colores
-        sketch = cv2.bitwise_not(edges)
+        # Dodge blend (efecto lápiz)
+        sketch = cv2.divide(gray, 255 - blur, scale=256)
 
-        # Guardar
         output_path = os.path.join(output_folder, filename)
         cv2.imwrite(output_path, sketch)
 

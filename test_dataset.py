@@ -2,7 +2,7 @@ import cv2
 import os
 import numpy as np
 
-input_folder = "dataset/cats_photos"
+input_folder = "dataset/cats_test"
 output_folder = "dataset/cats/test"
 
 os.makedirs(output_folder, exist_ok=True)
@@ -22,16 +22,17 @@ for filename in os.listdir(input_folder):
         # Resize
         img = cv2.resize(img, (256, 256))
 
-        # GENERAR SKETCH
+        #  SKETCH TIPO LÁPIZ 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(gray, (5, 5), 0)
-        edges = cv2.Canny(blur, 50, 150)
-        sketch = cv2.bitwise_not(edges)
 
-        # Convertir sketch a 3 canales
+        inv = 255 - gray
+        blur = cv2.GaussianBlur(inv, (21, 21), 0)
+        sketch = cv2.divide(gray, 255 - blur, scale=256)
+
+        # Convertir a 3 canales
         sketch = cv2.cvtColor(sketch, cv2.COLOR_GRAY2BGR)
 
-        # UNIR FOTO + SKETCH
+        #  UNIR A | B 
         AB = np.concatenate((img, sketch), axis=1)
 
         # Guardar
@@ -40,4 +41,4 @@ for filename in os.listdir(input_folder):
 
         count += 1
 
-print("Test dataset creado")
+print("Test dataset creado (sketch tipo lápiz)")
